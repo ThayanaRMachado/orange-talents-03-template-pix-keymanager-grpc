@@ -1,7 +1,6 @@
 package br.com.zup.edu.cadastro
 
-enum class TipoConta {
-
+enum class TipoDeConta {
     CONTA_CORRENTE,
     CONTA_POUPANCA
 }
