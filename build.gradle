@@ -36,15 +36,18 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     implementation("io.micronaut:micronaut-http-client")
     testImplementation("com.h2database:h2")
-    implementation("io.micronaut:micronaut-validation")
-    implementation("io.micronaut.beanvalidation:micronaut-hibernate-validator")
-    implementation("org.hibernate.validator:hibernate-validator:6.0.0.Final")
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
     testImplementation("io.micronaut:micronaut-http-client")
     runtime("io.micronaut.sql:micronaut-jdbc-hikari")
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
     runtimeOnly("mysql:mysql-connector-java:8.0.17")
     implementation("io.micronaut.xml:micronaut-jackson-xml")
+    annotationProcessor "io.micronaut:micronaut-inject-java:1.0.0" // <2>
+    compile "io.micronaut:micronaut-inject:1.0.0"
+
+    implementation("io.micronaut:micronaut-validation")
+    implementation("io.micronaut.beanvalidation:micronaut-hibernate-validator")
+    implementation("org.hibernate.validator:hibernate-validator:6.0.0.Final")
 }
 
 

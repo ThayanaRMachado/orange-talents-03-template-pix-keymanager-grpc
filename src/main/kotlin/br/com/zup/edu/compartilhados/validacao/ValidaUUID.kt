@@ -10,8 +10,9 @@ import kotlin.reflect.KClass
 @MustBeDocumented
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
-@Pattern(regexp = "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}\$")
-annotation class UUID(
+@Pattern(regexp = "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}\$",
+message = "O ID informado não está no formato UUID")
+annotation class ValidaUUID(
     val message: String = "O ID informado não está no formato UUID",
     val groups: Array<KClass<Any>> = [],
     val payload: Array<KClass<Payload>> = [],

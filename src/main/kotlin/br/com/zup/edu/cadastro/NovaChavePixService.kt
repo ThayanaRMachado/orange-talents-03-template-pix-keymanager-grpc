@@ -1,7 +1,7 @@
 package br.com.zup.edu.cadastro
 
-import io.micronaut.http.HttpStatus
-import io.micronaut.http.exceptions.HttpStatusException
+import br.com.zup.edu.compartilhados.handlers.ChavePixExistenteException
+import br.com.zup.edu.compartilhados.handlers.RecursoNaoEncontradoException
 import io.micronaut.validation.Validated
 import org.slf4j.LoggerFactory
 import javax.inject.Inject
@@ -22,10 +22,10 @@ class NovaChavePixService(
     fun registra(@Valid novaChave: NovaChavePix): ChavePix{
 
         if (repository.existsByValor(novaChave.valor!!))
-            throw java.lang.IllegalStateException("Chave Pix ${novaChave.valor} existente")
+            throw ChavePixExistenteException("Chave Pix ${novaChave.valor} existente")
 
         val response = itauClient.retornaDadosCliente(novaChave.idTitular, novaChave.tipoDeConta.name)
-        val conta = response.body().toModel() ?: throw HttpStatusException(HttpStatus.NOT_FOUND, "Cliente não localizado")
+        val conta = response.body().toModel() ?: throw RecursoNaoEncontradoException("Cliente inexistente ou não possui conta do tipo ${novaChave.tipoDeConta}")
 
         val chavePix = novaChave.toModel(conta)
         return repository.save(chavePix)

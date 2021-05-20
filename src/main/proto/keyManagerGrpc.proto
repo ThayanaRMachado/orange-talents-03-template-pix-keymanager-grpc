@@ -30,9 +30,12 @@ message RegistraChavePixRequest{
   TipoDeChave tipoDeChave = 2;
   string valor = 3;
   TipoDeConta tipoDeConta = 4;
-
 }
 
 message RegistraChavePixResponse{
   string pixId = 2;
+}
+
+message ValidationErrors {
+  repeated string message = 1;
 }
