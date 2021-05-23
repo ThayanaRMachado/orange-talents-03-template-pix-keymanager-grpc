@@ -1,6 +1,7 @@
 package br.com.zup.edu.cadastro
 
 import br.com.zup.edu.TipoDeChave
+import br.com.zup.edu.TipoDeConta
 import java.util.*
 import javax.persistence.*
 
@@ -13,7 +14,10 @@ class ChavePix(
     @Column(nullable = false, unique = true)
     val valor: String,
     @Column(nullable = false)
-    val idTitular: String
+    val idTitular: String,
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    val tipoDeConta: TipoDeConta,
 
 ) {
 

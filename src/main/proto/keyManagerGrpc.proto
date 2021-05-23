@@ -33,7 +33,7 @@ message RegistraChavePixRequest{
 }
 
 message RegistraChavePixResponse{
-  string pixId = 2;
+  string pixId = 1;
 }
 
 message ValidationErrors {

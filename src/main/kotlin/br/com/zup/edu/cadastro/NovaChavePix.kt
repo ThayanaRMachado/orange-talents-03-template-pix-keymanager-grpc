@@ -34,7 +34,8 @@ data class NovaChavePix(
             tipoDeChave = tipoDeChave,
             valor = if (!tipoDeChave.equals(TipoDeChave.ALEATORIA)) this.valor
             else UUID.randomUUID().toString(),
-            idTitular = idTitular
+            idTitular = idTitular,
+            tipoDeConta = tipoDeConta
         )
     }
 }

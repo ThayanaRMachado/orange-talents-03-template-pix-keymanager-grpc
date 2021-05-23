@@ -16,4 +16,5 @@ class ContaAssociada(
 
     @Column(nullable = false)
     val numero: String
-)
+) {
+}
