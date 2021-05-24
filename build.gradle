@@ -16,7 +16,6 @@ repositories {
 }
 
 micronaut {
-    runtime "netty"
     testRuntime("junit5")
     processing {
         incremental(true)
@@ -43,6 +42,7 @@ dependencies {
     implementation("io.micronaut.xml:micronaut-jackson-xml")
     annotationProcessor ("io.micronaut:micronaut-inject-java:1.0.0")
     compile "io.micronaut:micronaut-inject:1.0.0"
+    testImplementation("org.testcontainers:testcontainers")
 
     implementation("io.micronaut:micronaut-validation")
     implementation("io.micronaut.beanvalidation:micronaut-hibernate-validator")
@@ -54,6 +54,8 @@ dependencies {
     testRuntimeOnly ("org.junit.jupiter:junit-jupiter-engine:5.7.1")
     testImplementation("org.mockito:mockito-core")
     testImplementation ("org.junit.jupiter:junit-jupiter-params:5.7.2")
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.7.1'
+    testImplementation("io.micronaut:micronaut-http-client")
 
 }
 

@@ -1,6 +1,7 @@
 package br.com.zup.edu.cadastro
 
-import br.com.zup.edu.*
+import br.com.zup.edu.KeyManagerRegistraGrpcServiceGrpc
+import br.com.zup.edu.RegistraChavePixRequest
 import br.com.zup.edu.TipoDeChave
 import br.com.zup.edu.TipoDeConta
 import io.grpc.ManagedChannel
@@ -9,6 +10,7 @@ import io.grpc.StatusRuntimeException
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
+import io.micronaut.http.HttpResponse
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.junit.jupiter.api.Assertions.*
@@ -16,80 +18,76 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import java.util.*
+import javax.inject.Inject
 import javax.inject.Singleton
+
 
 @MicronautTest(transactional = false)
 internal class RegistraChaveEndpointTest(
-    val grpcClient: KeyManagerRegistraGrpcServiceGrpc.KeyManagerRegistraGrpcServiceBlockingStub,
     val repository: ChavePixRepository,
-    val client: ContasDeClientesNoItauClient
+    val grpcClient: KeyManagerRegistraGrpcServiceGrpc.KeyManagerRegistraGrpcServiceBlockingStub
 ) {
 
-    @Test
-    fun `deve salvar uma chave pix com cpf`() {
+    @field:Inject
+    lateinit var itau: ContasDeClientesNoItauClient
 
-        // repository.deleteAll()
+    companion object {
+        val TITULAR_ID = UUID.randomUUID()
+    }
+
+    @Test
+    fun `deve registrar uma chave pix`() {
+        Mockito.`when`(itau.retornaDadosCliente(TITULAR_ID.toString(), "CONTA_CORRENTE"))
+            .thenReturn(HttpResponse.ok(dadosDaContaResponse()))
 
         val response = grpcClient.registra(
             RegistraChavePixRequest.newBuilder()
-                .setIdTitular("c56dfef4-7901-44fb-84e2-a2cefb157890")
+                .setIdTitular(TITULAR_ID.toString())
                 .setTipoDeChave(TipoDeChave.CPF)
                 .setValor("02467781054")
                 .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
                 .build()
         )
 
-        with(response) {
+         with(response) {
+            assertEquals(TITULAR_ID.toString(), idTitular)
             assertNotNull(pixId)
-            assertTrue(repository.existsById(pixId))
         }
     }
 
     @Test
-    fun `deve salvar a chave pix com email`() {
-        repository.deleteAll()
+    fun `nao deve registrar uma nova chave pix quando ja foi cadastrada antes`(){
 
-        val response = grpcClient.registra(
-            RegistraChavePixRequest.newBuilder()
-                .setIdTitular("c56dfef4-7901-44fb-84e2-a2cefb157890")
-                .setTipoDeChave(TipoDeChave.EMAIL)
-                .setValor("joao@email.com")
+        Mockito.`when`(itau.retornaDadosCliente(TITULAR_ID.toString(), "CONTA_CORRENTE"))
+            .thenReturn(HttpResponse.notFound())
+
+        val chavePix = ChavePix(TipoDeChave.CPF, valor = "02467781054", idTitular = TITULAR_ID.toString(), TipoDeConta.CONTA_CORRENTE)
+        repository.save(chavePix)
+
+        val resultado = assertThrows<StatusRuntimeException> {
+            grpcClient.registra(
+                RegistraChavePixRequest.newBuilder()
+                .setIdTitular(TITULAR_ID.toString())
+                .setTipoDeChave(TipoDeChave.CPF)
+                .setValor("02467781054")
                 .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
-                .build()
-        )
-
-        with(response) {
-            assertNotNull(pixId)
-            assertTrue(repository.existsById(pixId))
+                .build())
         }
-    }
 
-    @Test
-    fun `deve salvar a chave pix com celular`() {
-        //repository.deleteAll()
-
-        val response = grpcClient.registra(
-            RegistraChavePixRequest.newBuilder()
-                .setIdTitular("c56dfef4-7901-44fb-84e2-a2cefb157890")
-                .setTipoDeChave(TipoDeChave.CELULAR)
-                .setValor("+5531988888888")
-                .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
-                .build()
-        )
-
-        with(response) {
-            assertNotNull(pixId)
-            assertTrue(repository.existsById(pixId))
+        with(resultado) {
+            assertEquals(Status.ALREADY_EXISTS.code, status.code)
         }
     }
 
     @Test
     fun `deve salvar a chave pix aleatoria`() {
-        repository.deleteAll()
+
+        Mockito.`when`(itau.retornaDadosCliente(TITULAR_ID.toString(), "CONTA_CORRENTE"))
+            .thenReturn(HttpResponse.ok(dadosDaContaResponse()))
 
         val response = grpcClient.registra(
             RegistraChavePixRequest.newBuilder()
-                .setIdTitular(UUID.randomUUID().toString())
+                .setIdTitular(TITULAR_ID.toString())
                 .setTipoDeChave(TipoDeChave.ALEATORIA)
                 .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
                 .build()
@@ -101,37 +99,9 @@ internal class RegistraChaveEndpointTest(
         }
     }
 
-    @Test
-    fun `nao deve adicionar uma nova chave quando já existir uma cadastrada`() {
-        val existente =
-            repository.save(
-                ChavePix(
-                    TipoDeChave.CPF,
-                    "86135457004",
-                    "5260263c-a3c1-4727-ae32-3bdb2538841b",
-                    TipoDeConta.CONTA_CORRENTE
-                )
-            )
-
-        val erro = assertThrows<StatusRuntimeException> {
-            grpcClient.registra(
-                RegistraChavePixRequest.newBuilder()
-                    .setTipoDeChave(existente.tipoDeChave)
-                    .setValor(existente.valor)
-                    .setIdTitular(existente.idTitular)
-                    .setTipoDeConta(existente.tipoDeConta)
-                    .build()
-            )
-        }
-
-        with(erro) {
-            assertEquals(Status.ALREADY_EXISTS.code, status.code)
-            assertEquals("Chave Pix já cadastrado!", status.description)
-        }
-    }
 
     @MockBean(ContasDeClientesNoItauClient::class)
-    fun erpClient(): ContasDeClientesNoItauClient? {
+    fun itaumock(): ContasDeClientesNoItauClient {
         return Mockito.mock(ContasDeClientesNoItauClient::class.java)
     }
 
@@ -142,6 +112,23 @@ internal class RegistraChaveEndpointTest(
             return KeyManagerRegistraGrpcServiceGrpc.newBlockingStub(channel)
 
         }
-
     }
+
+    private fun dadosDaContaResponse(): DadosDaContaResponse {
+        return DadosDaContaResponse(
+            tipoDeConta = br.com.zup.edu.cadastro.TipoDeConta.CONTA_CORRENTE,
+            instituicao = InstituicaoResponse("UNIBANCO ITAU SA", "60701190"),
+            agencia = "0001",
+            numero = "291900",
+            titular = TitularResponse("Rafael Ponte", "02467781054")
+        )
+    }
+
 }
+
+
+
+
+
+
+
