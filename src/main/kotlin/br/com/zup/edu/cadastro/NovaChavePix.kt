@@ -1,9 +1,9 @@
 package br.com.zup.edu.cadastro
 
 import br.com.zup.edu.TipoDeConta
-import br.com.zup.edu.compartilhados.validacao.ValidaUUID
-import br.com.zup.edu.compartilhados.validacao.ValidaChavePix
 import br.com.zup.edu.TipoDeChave
+import br.com.zup.edu.compartilhados.validacao.ValidaChavePix
+import br.com.zup.edu.compartilhados.validacao.ValidaUUID
 import io.micronaut.core.annotation.Introspected
 import java.util.*
 import javax.validation.constraints.NotBlank

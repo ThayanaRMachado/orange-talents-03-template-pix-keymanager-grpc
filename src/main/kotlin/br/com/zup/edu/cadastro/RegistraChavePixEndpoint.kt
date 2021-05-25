@@ -1,5 +1,6 @@
 package br.com.zup.edu.cadastro
 
+import br.com.zup.edu.ChavePixRepository
 import br.com.zup.edu.KeyManagerRegistraGrpcServiceGrpc
 import br.com.zup.edu.RegistraChavePixRequest
 import br.com.zup.edu.RegistraChavePixResponse
@@ -38,6 +39,7 @@ class RegistraChaveEndpoint(@Inject val service: NovaChavePixService, @Inject va
         responseObserver.onNext(
             RegistraChavePixResponse.newBuilder()
                 .setPixId(chaveCriada.id.toString())
+                .setIdTitular(request.idTitular)
                 .build()
         )
         responseObserver.onCompleted()

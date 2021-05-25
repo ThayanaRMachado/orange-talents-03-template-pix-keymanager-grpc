@@ -8,7 +8,11 @@ package br.com.zup.edu;
 import "google/protobuf/timestamp.proto";
 
 service KeyManagerRegistraGrpcService {
-  rpc registra(RegistraChavePixRequest) returns (RegistraChavePixResponse);
+  rpc registra(RegistraChavePixRequest) returns (RegistraChavePixResponse){}
+}
+
+service KeyManagerDeletaGrpcService {
+  rpc deleta(DeletaChavePixRequest) returns (DeletaChavePixResponse){}
 }
 
 enum TipoDeConta {
@@ -39,4 +43,13 @@ message RegistraChavePixResponse{
 
 message ValidationErrors {
   repeated string message = 1;
+}
+
+message DeletaChavePixRequest{
+  string pixId = 1;
+  string idTitular = 2;
+}
+
+message DeletaChavePixResponse{
+  string status = 1;
 }

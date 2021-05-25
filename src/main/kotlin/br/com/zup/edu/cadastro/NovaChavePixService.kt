@@ -1,5 +1,6 @@
 package br.com.zup.edu.cadastro
 
+import br.com.zup.edu.ChavePixRepository
 import br.com.zup.edu.compartilhados.handlers.ChavePixExistenteException
 import br.com.zup.edu.compartilhados.handlers.RecursoNaoEncontradoException
 import io.micronaut.validation.Validated

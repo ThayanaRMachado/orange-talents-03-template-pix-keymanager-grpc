@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 
 @Constraint(validatedBy = [])
 @MustBeDocumented
-@Target(AnnotationTarget.FIELD)
+@Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 @Pattern(regexp = "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}\$",
 message = "O ID informado não está no formato UUID")

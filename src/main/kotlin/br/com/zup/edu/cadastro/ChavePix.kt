@@ -4,6 +4,7 @@ import br.com.zup.edu.TipoDeChave
 import br.com.zup.edu.TipoDeConta
 import java.util.*
 import javax.persistence.*
+import javax.validation.constraints.NotNull
 
 @Entity
 class ChavePix(
@@ -13,8 +14,8 @@ class ChavePix(
     val tipoDeChave: TipoDeChave,
     @Column(nullable = false, unique = true)
     val valor: String,
-    @Column(nullable = false)
-    val idTitular: String,
+    @field:NotNull
+    val idTitular: String = UUID.randomUUID().toString(),
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     val tipoDeConta: TipoDeConta,
