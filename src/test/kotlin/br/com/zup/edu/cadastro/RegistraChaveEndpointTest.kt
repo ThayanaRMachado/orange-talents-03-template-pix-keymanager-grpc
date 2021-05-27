@@ -138,4 +138,5 @@ internal class RegistraChaveEndpointTest(
     fun itaumock(): ContasDeClientesNoItauClient? {
         return Mockito.mock(ContasDeClientesNoItauClient::class.java)
     }
+
 }

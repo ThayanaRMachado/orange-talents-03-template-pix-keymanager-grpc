@@ -113,8 +113,8 @@ internal class DeletaChavePixEndpointTest(
     @Factory
     class Clients {
         @Singleton
-        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): KeyManagerRegistraGrpcServiceGrpc.KeyManagerRegistraGrpcServiceBlockingStub {
-            return KeyManagerRegistraGrpcServiceGrpc.newBlockingStub(channel)
+        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): KeyManagerDeletaGrpcServiceGrpc.KeyManagerDeletaGrpcServiceBlockingStub {
+            return KeyManagerDeletaGrpcServiceGrpc.newBlockingStub(channel)
 
         }
     }
