@@ -2,7 +2,6 @@ package br.com.zup.edu.compartilhados.handlers
 
 import io.grpc.BindableService
 import io.grpc.stub.StreamObserver
-import io.grpc.protobuf.StatusProto
 import io.micronaut.aop.InterceptorBean
 import io.micronaut.aop.MethodInterceptor
 import io.micronaut.aop.MethodInvocationContext
@@ -11,37 +10,31 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-@InterceptorBean(ErrorHandler::class)
 class ExceptionHandlerInterceptor(
-    @Inject val resolver: ExceptionHandlerResolver
+    @Inject private val resolver: ExceptionHandlerResolver
 ) : MethodInterceptor<BindableService, Any?> {
 
-    private val LOGGER = LoggerFactory.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun intercept(context: MethodInvocationContext<BindableService, Any?>): Any? {
         try {
             return context.proceed()
+
         } catch (e: Exception) {
-            resolver.resolve(e)
-                .handle(e)
-                .let { status -> StatusProto.toStatusException(status) }
-                .run { GrpcEndpointArguments(context).response().onError(this) }
-                .also {
-                    LOGGER.error(
-                        """
-                Handling the exception ${e.javaClass.name}
-                while processing the call: ${context.targetMethod}""".trimIndent()
-                    )
-                }
+            val handler = resolver.resolve(e) as ExceptionHandler<Exception>
 
-            return null
+            val status = handler.handle(e)
+
+            GrpcEndpointArguments(context).response()
+                .onError(status.status.asRuntimeException())
         }
-    }
 
-    class GrpcEndpointArguments(val context: MethodInvocationContext<BindableService, Any?>) {
-        fun response(): StreamObserver<*> {
-            return context.parameterValues[1] as StreamObserver<*>
-        }
+        return null
     }
+}
 
+private class GrpcEndpointArguments(val context: MethodInvocationContext<BindableService, Any?>) {
+    fun response(): StreamObserver<*> {
+        return context.parameterValues[1] as StreamObserver<*>
+    }
 }

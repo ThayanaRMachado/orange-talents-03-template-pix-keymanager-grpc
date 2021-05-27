@@ -4,6 +4,8 @@ import br.com.zup.edu.ChavePixRepository
 import br.com.zup.edu.KeyManagerRegistraGrpcServiceGrpc
 import br.com.zup.edu.RegistraChavePixRequest
 import br.com.zup.edu.RegistraChavePixResponse
+import br.com.zup.edu.compartilhados.handlers.ChavePixExistenteException
+import br.com.zup.edu.compartilhados.handlers.ClienteInexistenteException
 import br.com.zup.edu.compartilhados.handlers.ErrorHandler
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
@@ -15,7 +17,7 @@ import javax.validation.ConstraintViolationException
 
 @Singleton
 @ErrorHandler
-class RegistraChaveEndpoint(@Inject val service: NovaChavePixService, @Inject val repository: ChavePixRepository) :
+class RegistraChaveEndpoint(@Inject val service: NovaChavePixService, @Inject val chavePixRepository: ChavePixRepository) :
     KeyManagerRegistraGrpcServiceGrpc.KeyManagerRegistraGrpcServiceImplBase() {
 
     private val LOGGER = LoggerFactory.getLogger(this::class.java)
@@ -25,15 +27,17 @@ class RegistraChaveEndpoint(@Inject val service: NovaChavePixService, @Inject va
         responseObserver: StreamObserver<RegistraChavePixResponse>
     ) {
         val novaChave = request.toModel()
-        val chaveCriada: ChavePix = try {
-            service.registra(novaChave)
-        } catch  (e: ConstraintViolationException){
-            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.message).asRuntimeException())
-            return
+
+        if (chavePixRepository.existsByValor(novaChave.valor)) {
+            throw ChavePixExistenteException("Chave Pix já cadastrada!")
+        }
+
+        var chaveCriada: ChavePix? = null
+
+        try {
+            chaveCriada = service.registra(novaChave)
         } catch (e: HttpClientResponseException) {
-            println(e.message)
-            println(e.status)
-            return
+            throw ClienteInexistenteException("Cliente inexistente")
         }
 
         responseObserver.onNext(
