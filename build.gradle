@@ -36,7 +36,7 @@ dependencies {
     implementation("io.micronaut:micronaut-http-client")
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
     testImplementation("io.micronaut:micronaut-http-client")
-    runtime("io.micronaut.sql:micronaut-jdbc-hikari")
+    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
     runtimeOnly("mysql:mysql-connector-java:8.0.17")
     implementation("io.micronaut.xml:micronaut-jackson-xml")
@@ -45,7 +45,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers")
 
     implementation("io.micronaut:micronaut-validation")
-    //implementation("io.micronaut.beanvalidation:micronaut-hibernate-validator")
+    implementation("io.micronaut.beanvalidation:micronaut-hibernate-validator")
     implementation("org.hibernate.validator:hibernate-validator:6.0.0.Final")
 
     testImplementation("com.h2database:h2")

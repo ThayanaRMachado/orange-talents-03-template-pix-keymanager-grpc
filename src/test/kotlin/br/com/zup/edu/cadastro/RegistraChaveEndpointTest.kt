@@ -24,13 +24,12 @@ import javax.inject.Singleton
 
 @MicronautTest(transactional = false)
 internal class RegistraChaveEndpointTest(
-       val grpcClient: KeyManagerRegistraGrpcServiceGrpc.KeyManagerRegistraGrpcServiceBlockingStub,
+    val repository: ChavePixRepository,
+    val grpcClient: KeyManagerRegistraGrpcServiceGrpc.KeyManagerRegistraGrpcServiceBlockingStub,
 ) {
-    @field:Inject
-    lateinit var repository: ChavePixRepository
 
-    /*@field:Inject
-    lateinit var itau: ContasDeClientesNoItauClient*/
+    @field:Inject
+    lateinit var itau: ContasDeClientesNoItauClient
 
     companion object {
         val idItau = UUID.randomUUID().toString()
@@ -42,13 +41,9 @@ internal class RegistraChaveEndpointTest(
     }
 
     @Test
-    fun exemplo() {
-
-    }
-   /* @Test
     fun `deve cadastrar uma nova chave`() {
 
-        `when`(itau.retornaDadosCliente(idItau,"CONTA_CORRENTE"))
+        `when`(itau.retornaDadosCliente(idItau, "CONTA_CORRENTE"))
             .thenReturn(HttpResponse.ok(dadosDaContaResponse))
 
         val response: RegistraChavePixResponse = grpcClient.registra(
@@ -61,8 +56,8 @@ internal class RegistraChaveEndpointTest(
         )
 
         with(response) {
-            assertNotNull(this.pixId)
-            assertTrue(repository.existsByValor(this.pixId))
+            assertEquals(idItau, idTitular)
+            assertNotNull(pixId)
         }
 
     }
@@ -120,7 +115,7 @@ internal class RegistraChaveEndpointTest(
         assertEquals(Status.INVALID_ARGUMENT.code, response.status.code)
         assertTrue(!repository.existsByValor(""))
     }
-*/
+
     private val dadosDaContaResponse =
         DadosDaContaResponse(
             tipoDeConta = TipoDeConta.CONTA_CORRENTE,

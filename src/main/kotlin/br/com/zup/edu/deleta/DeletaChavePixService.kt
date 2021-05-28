@@ -28,6 +28,9 @@ class DeletaChavePixService(
                 }
 
         chavePixRepository.delete(chaveInformada)
+
+                logger.info("Chave Pix de ID ${pixId} deletada")
+
     }
 
 }

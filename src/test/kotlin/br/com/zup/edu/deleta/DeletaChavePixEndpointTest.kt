@@ -22,14 +22,19 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @MicronautTest(transactional = false)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class DeletaChavePixEndpointTest(
-    val repository: ChavePixRepository,
     val grpcClient: KeyManagerDeletaGrpcServiceGrpc.KeyManagerDeletaGrpcServiceBlockingStub
 ) {
 
     @field:Inject
+    lateinit var repository: ChavePixRepository
+
+    @field:Inject
     lateinit var itau: ContasDeClientesNoItauClient
+
+    companion object {
+        val idItau = UUID.randomUUID().toString()
+    }
 
     lateinit var chave_existente: ChavePix
 
@@ -39,26 +44,29 @@ internal class DeletaChavePixEndpointTest(
             ChavePix(
                 TipoDeChave.CPF,
                 "02467781054",
-                UUID.randomUUID().toString(),
-                br.com.zup.edu.TipoDeConta.CONTA_CORRENTE,))
+                idItau,
+                br.com.zup.edu.TipoDeConta.CONTA_CORRENTE,
+            )
+        )
     }
 
-    @AfterAll
-    fun cleanup(){
+    @AfterEach
+    fun cleanup() {
         repository.deleteAll()
     }
 
     @Test
-    fun `deve remover chave pix existente`(){
+    fun `deve remover chave pix existente`() {
 
         Mockito.`when`(itau.retornaDadosCliente(RegistraChaveEndpointTest.idItau, "CONTA_CORRENTE"))
             .thenReturn(HttpResponse.ok())
 
         val response: DeletaChavePixResponse = grpcClient.deleta(
             DeletaChavePixRequest.newBuilder()
-            .setPixId(chave_existente.id)
-            .setIdTitular(chave_existente.idTitular)
-            .build())
+                .setPixId(chave_existente.id)
+                .setIdTitular(chave_existente.idTitular)
+                .build()
+        )
 
         with(response) {
             assertFalse(repository.existsById(chave_existente.id))
@@ -72,7 +80,8 @@ internal class DeletaChavePixEndpointTest(
         Mockito.`when`(itau.retornaDadosCliente(RegistraChaveEndpointTest.idItau, "CONTA_CORRENTE"))
             .thenReturn(HttpResponse.notFound())
 
-        val pixIdInexistente = UUID.randomUUID().toString()
+        //val pixIdInexistente = UUID.randomUUID().toString()
+        val pixIdInexistente = idItau
 
         val thrown = assertThrows<StatusRuntimeException> {
             grpcClient.deleta(
@@ -84,12 +93,12 @@ internal class DeletaChavePixEndpointTest(
 
         with(thrown) {
             assertEquals(Status.NOT_FOUND.code, status.code)
-            assertEquals("Chave Pix não encontrada ou não pertence ao cliente.", status.description)
+            assertEquals("Chave não encontrada.", status.description)
         }
     }
 
     @Test
-    fun `nao deve remover chave pix quando chave existente mas pertence a outro cliente`(){
+    fun `nao deve remover chave pix quando chave existente mas pertence a outro cliente`() {
 
         Mockito.`when`(itau.retornaDadosCliente(RegistraChaveEndpointTest.idItau, "CONTA_CORRENTE"))
             .thenReturn(HttpResponse.notFound())
@@ -101,12 +110,13 @@ internal class DeletaChavePixEndpointTest(
                 DeletaChavePixRequest.newBuilder()
                     .setPixId(chave_existente.id)
                     .setIdTitular(outroClienteId)
-                    .build())
+                    .build()
+            )
         }
 
         with(thrown) {
             assertEquals(Status.NOT_FOUND.code, status.code)
-            assertEquals("Chave Pix não encontrada ou não pertence ao cliente.", status.description)
+            assertEquals("Chave não encontrada.", status.description)
         }
     }
 
