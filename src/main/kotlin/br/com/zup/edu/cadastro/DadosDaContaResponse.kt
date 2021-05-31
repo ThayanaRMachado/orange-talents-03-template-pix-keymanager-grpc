@@ -7,7 +7,7 @@ import io.micronaut.core.annotation.Introspected
 open class DadosDaContaResponse(
 
     @field: JsonProperty("tipo")
-    private val tipoDeConta: TipoDeConta,
+    private val tipoDeConta: String,
 
     @field: JsonProperty("instituicao")
     val instituicao: InstituicaoResponse,
@@ -23,7 +23,13 @@ open class DadosDaContaResponse(
 ) {
 
     fun toModel(): ContaAssociada {
-        return ContaAssociada(tipoDeConta, agencia, numero)
+        return ContaAssociada(
+            instituicao = this.instituicao.nome,
+            nomeTitular = this.titular.nome,
+            cpfTitular = this.titular.cpf,
+            agencia = this.agencia,
+            numero = this.numero
+        )
     }
 }
 
@@ -31,9 +37,12 @@ class TitularResponse(
     @field: JsonProperty("nome")
     val nome: String,
     @field: JsonProperty("cpf")
-    val cpf: String)
+    val cpf: String
+)
+
 class InstituicaoResponse(
     @field: JsonProperty("nome")
     val nome: String,
     @field: JsonProperty("ispb")
-    val ispb: String)
+    val ispb: String
+)

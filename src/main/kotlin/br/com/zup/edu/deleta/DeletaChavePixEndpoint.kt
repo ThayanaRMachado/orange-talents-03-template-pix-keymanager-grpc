@@ -1,6 +1,5 @@
 package br.com.zup.edu.deleta
 
-import br.com.zup.edu.ChavePixRepository
 import br.com.zup.edu.DeletaChavePixRequest
 import br.com.zup.edu.DeletaChavePixResponse
 import br.com.zup.edu.KeyManagerDeletaGrpcServiceGrpc

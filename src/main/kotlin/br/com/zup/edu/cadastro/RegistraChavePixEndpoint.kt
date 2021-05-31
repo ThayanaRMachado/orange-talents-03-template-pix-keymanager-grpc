@@ -7,17 +7,18 @@ import br.com.zup.edu.RegistraChavePixResponse
 import br.com.zup.edu.compartilhados.handlers.ChavePixExistenteException
 import br.com.zup.edu.compartilhados.handlers.ClienteInexistenteException
 import br.com.zup.edu.compartilhados.handlers.ErrorHandler
-import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import org.slf4j.LoggerFactory
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.validation.ConstraintViolationException
 
 @Singleton
 @ErrorHandler
-class RegistraChaveEndpoint(@Inject val service: NovaChavePixService, @Inject val chavePixRepository: ChavePixRepository) :
+class RegistraChaveEndpoint(
+    @Inject val service: NovaChavePixService,
+    @Inject val chavePixRepository: ChavePixRepository
+) :
     KeyManagerRegistraGrpcServiceGrpc.KeyManagerRegistraGrpcServiceImplBase() {
 
     private val LOGGER = LoggerFactory.getLogger(this::class.java)

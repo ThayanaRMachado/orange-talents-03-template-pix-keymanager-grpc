@@ -1,7 +1,7 @@
 package br.com.zup.edu.cadastro
 
-import br.com.zup.edu.TipoDeConta
 import br.com.zup.edu.TipoDeChave
+import br.com.zup.edu.TipoDeConta
 import br.com.zup.edu.compartilhados.validacao.ValidaChavePix
 import br.com.zup.edu.compartilhados.validacao.ValidaUUID
 import io.micronaut.core.annotation.Introspected
@@ -29,13 +29,19 @@ data class NovaChavePix(
 ) {
 
     fun toModel(contaAssociada: ContaAssociada): ChavePix {
-
         return ChavePix(
             tipoDeChave = tipoDeChave,
             valor = if (!tipoDeChave.equals(TipoDeChave.ALEATORIA)) this.valor
             else UUID.randomUUID().toString(),
             idTitular = idTitular,
-            tipoDeConta = tipoDeConta
+            tipoDeConta = tipoDeConta,
+            conta = ContaAssociada(
+                contaAssociada.instituicao,
+                contaAssociada.nomeTitular,
+                contaAssociada.cpfTitular,
+                contaAssociada.agencia,
+                contaAssociada.numero
+            )
         )
     }
 }

@@ -1,8 +1,11 @@
 package br.com.zup.edu.deleta
 
 import br.com.zup.edu.*
-import br.com.zup.edu.cadastro.ChavePix
-import br.com.zup.edu.cadastro.ContasDeClientesNoItauClient
+import br.com.zup.edu.TipoDeChave
+import br.com.zup.edu.bcb.BancoCentralClient
+import br.com.zup.edu.bcb.DeleteChavePixRequest
+import br.com.zup.edu.bcb.DeleteChavePixResponse
+import br.com.zup.edu.cadastro.*
 import br.com.zup.edu.cadastro.RegistraChaveEndpointTest
 import io.grpc.ManagedChannel
 import io.grpc.Status
@@ -14,9 +17,9 @@ import io.micronaut.http.HttpResponse
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.*
 import org.mockito.Mockito
+import java.time.LocalDateTime
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,6 +35,9 @@ internal class DeletaChavePixEndpointTest(
     @field:Inject
     lateinit var itau: ContasDeClientesNoItauClient
 
+    @field:Inject
+    lateinit var bcb: BancoCentralClient
+
     companion object {
         val idItau = UUID.randomUUID().toString()
     }
@@ -44,8 +50,14 @@ internal class DeletaChavePixEndpointTest(
             ChavePix(
                 TipoDeChave.CPF,
                 "02467781054",
-                idItau,
+                "c56dfef4-7901-44fb-84e2-a2cefb157890",
                 br.com.zup.edu.TipoDeConta.CONTA_CORRENTE,
+                conta = ContaAssociada(
+                    instituicao = "UNIBANCO ITAU SA", "60701190",
+                    agencia = "0001",
+                    cpfTitular = "02467781054",
+                    numero = "0001"
+                )
             )
         )
     }
@@ -58,7 +70,7 @@ internal class DeletaChavePixEndpointTest(
     @Test
     fun `deve remover chave pix existente`() {
 
-        Mockito.`when`(itau.retornaDadosCliente(RegistraChaveEndpointTest.idItau, "CONTA_CORRENTE"))
+        Mockito.`when`(bcb.deleteChavePixBcb("rafael@email.com", deletaChavePixRequest()))
             .thenReturn(HttpResponse.ok())
 
         val response: DeletaChavePixResponse = grpcClient.deleta(
@@ -69,38 +81,33 @@ internal class DeletaChavePixEndpointTest(
         )
 
         with(response) {
-            assertFalse(repository.existsById(chave_existente.id))
+            assertFalse(repository.existsByValor(valor = "rafael@email.com"))
         }
 
     }
 
-    @Test
-    fun `nao deve remover chave pix quando inexistente`(){
 
-        Mockito.`when`(itau.retornaDadosCliente(RegistraChaveEndpointTest.idItau, "CONTA_CORRENTE"))
+    @Test
+    fun `nao deve remover chave pix quando inexistente`() {
+        Mockito.`when`(itau.retornaDadosCliente(idItau, "CONTA_CORRENTE"))
             .thenReturn(HttpResponse.notFound())
 
-        //val pixIdInexistente = UUID.randomUUID().toString()
-        val pixIdInexistente = idItau
-
-        val thrown = assertThrows<StatusRuntimeException> {
+        val response = assertThrows<StatusRuntimeException> {
             grpcClient.deleta(
                 DeletaChavePixRequest.newBuilder()
-                .setPixId(pixIdInexistente)
-                .setIdTitular(chave_existente.idTitular)
-                .build())
+                    .setPixId(idItau)
+                    .setIdTitular(chave_existente.idTitular)
+                    .build()
+            )
         }
 
-        with(thrown) {
-            assertEquals(Status.NOT_FOUND.code, status.code)
-            assertEquals("Chave não encontrada.", status.description)
-        }
+        assertEquals(Status.NOT_FOUND.code, response.status.code)
     }
 
     @Test
     fun `nao deve remover chave pix quando chave existente mas pertence a outro cliente`() {
 
-        Mockito.`when`(itau.retornaDadosCliente(RegistraChaveEndpointTest.idItau, "CONTA_CORRENTE"))
+        Mockito.`when`(itau.retornaDadosCliente(idItau, "CONTA_CORRENTE"))
             .thenReturn(HttpResponse.notFound())
 
         val outroClienteId = UUID.randomUUID().toString()
@@ -120,6 +127,22 @@ internal class DeletaChavePixEndpointTest(
         }
     }
 
+
+    fun deletaChavePixRequest(): DeleteChavePixRequest {
+        return DeleteChavePixRequest(
+            key = "60701190",
+            participant = "rafael@email.com"
+        )
+    }
+
+    private fun deletaChavePixResponse(): DeleteChavePixResponse {
+        return DeleteChavePixResponse(
+            key = "rafael@email.com",
+            participant = "60701190",
+            apagadoEm = LocalDateTime.now().toString()
+        )
+    }
+
     @Factory
     class Clients {
         @Singleton
@@ -132,6 +155,11 @@ internal class DeletaChavePixEndpointTest(
     @MockBean(ContasDeClientesNoItauClient::class)
     fun itaumock(): ContasDeClientesNoItauClient? {
         return Mockito.mock(ContasDeClientesNoItauClient::class.java)
+    }
+
+    @MockBean(BancoCentralClient::class)
+    fun createChavePixBcb(): BancoCentralClient? {
+        return Mockito.mock(BancoCentralClient::class.java)
     }
 
 }
