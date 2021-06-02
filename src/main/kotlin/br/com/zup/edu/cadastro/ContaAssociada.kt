@@ -2,27 +2,30 @@ package br.com.zup.edu.cadastro
 
 import javax.persistence.Column
 import javax.persistence.Embeddable
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Size
 
 @Embeddable
 class ContaAssociada(
-    @field:NotBlank
-    val instituicao: String,
 
     @field:NotBlank
-    val nomeTitular: String,
+    @Column(name = "conta_titular_nome", nullable = false)
+    val nomeDoTitular: String,
 
     @field:NotBlank
     @field:Size(max = 11)
-    val cpfTitular: String,
+    @Column(name = "conta_titular_cpf", length = 11, nullable = false)
+    val cpfDoTitular: String,
 
-    @field:NotBlank
     @Column(nullable = false)
     val agencia: String,
 
-    @field:NotBlank
     @Column(nullable = false)
     val numero: String
 ) {
+    companion object {
+        public val ITAU_UNIBANCO_ISPB: String = "60701190"
+    }
 }

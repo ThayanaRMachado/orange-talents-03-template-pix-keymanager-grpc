@@ -43,5 +43,4 @@ enum class TipoDeChave {
     };
 
     abstract fun valida(chave: String?, context: ConstraintValidatorContext): Boolean
-
 }
