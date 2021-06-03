@@ -23,7 +23,13 @@ open class DadosDaContaResponse(
 ) {
 
     fun toModel(): ContaAssociada {
-        return ContaAssociada(numero = numero,agencia = agencia, nomeDoTitular = titular.nome, cpfDoTitular = titular.cpf)
+        return ContaAssociada(
+            instituicao = instituicao.nome,
+            numero = numero,
+            agencia = agencia,
+            nomeDoTitular = titular.nome,
+            cpfDoTitular = titular.cpf
+        )
     }
 }
 

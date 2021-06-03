@@ -3,9 +3,11 @@ package br.com.zup.edu.cadastro
 import br.com.zup.edu.ChavePixRepository
 import br.com.zup.edu.bcb.BancoCentralClient
 import br.com.zup.edu.bcb.CreatePixKeyRequest
+import br.com.zup.edu.compartilhados.handlers.ClienteInexistenteException
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
 import io.micronaut.grpc.annotation.GrpcService
+import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.validation.Validated
 import org.slf4j.LoggerFactory
@@ -27,6 +29,13 @@ class NovaChavePixService(
     @Transactional
     fun registra(@Valid novaChave: NovaChavePix): ChavePix{
 
+        val validaConta: HttpResponse<DadosDaContaResponse> =
+            itauClient.validaCliente(novaChave.idTitular, novaChave.tipoDeConta!!.name)
+
+        val contaValidada: ContaAssociada
+            validaConta.body()?.toModel()
+                ?: throw ClienteInexistenteException("Cliente inexistente!")
+
         if (repository.existsByValor(novaChave.valor))
             throw IllegalArgumentException("Chave Pix '${novaChave.valor}' existente")
 
@@ -47,7 +56,6 @@ class NovaChavePixService(
         if (bcbResponse.status != HttpStatus.CREATED)
             throw IllegalStateException("Erro ao registrar chave Pix no Banco Central do Brasil (BCB)")
 
-        // 5. atualiza chave do dominio com chave gerada pelo BCB
         if (chavePix.isAleatoria()) {
             chavePix.valor = bcbResponse.body()!!.key
         }

@@ -2,13 +2,15 @@ package br.com.zup.edu.cadastro
 
 import javax.persistence.Column
 import javax.persistence.Embeddable
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Size
 
 @Embeddable
 class ContaAssociada(
+
+    @field:NotBlank
+    @Column(name = "conta_instituicao", nullable = false)
+    val instituicao: String,
 
     @field:NotBlank
     @Column(name = "conta_titular_nome", nullable = false)

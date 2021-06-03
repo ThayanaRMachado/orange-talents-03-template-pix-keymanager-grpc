@@ -37,6 +37,7 @@ data class NovaChavePix(
             idTitular = idTitular,
             tipoDeConta = tipoDeConta,
             conta = ContaAssociada(
+                instituicao = contaAssociada.instituicao,
                 nomeDoTitular = contaAssociada.nomeDoTitular,
                 cpfDoTitular = contaAssociada.cpfDoTitular,
                 agencia = contaAssociada.agencia,
