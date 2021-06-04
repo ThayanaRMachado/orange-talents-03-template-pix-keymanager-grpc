@@ -3,13 +3,11 @@ package br.com.zup.edu.bcb
 import br.com.zup.edu.TipoDeConta
 import br.com.zup.edu.cadastro.ChavePix
 import br.com.zup.edu.cadastro.ContaAssociada
-import br.com.zup.edu.cadastro.TipoDeChave
+import br.com.zup.edu.TipoDeChave
+import br.com.zup.edu.carrega.ChavePixInfo
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.MediaType
-import io.micronaut.http.annotation.Body
-import io.micronaut.http.annotation.Delete
-import io.micronaut.http.annotation.PathVariable
-import io.micronaut.http.annotation.Post
+import io.micronaut.http.annotation.*
 import io.micronaut.http.client.annotation.Client
 import java.time.LocalDateTime
 
@@ -28,9 +26,12 @@ interface BancoCentralClient {
 
     @Delete("/api/v1/pix/keys/{key}",
         produces = [MediaType.APPLICATION_XML],
-        consumes = [MediaType.APPLICATION_XML]
-    )
+        consumes = [MediaType.APPLICATION_XML])
     fun delete(@PathVariable key: String, @Body request: DeletePixKeyRequest): HttpResponse<DeletePixKeyResponse>
+
+    @Get("/api/v1/pix/keys/{key}",
+        consumes = [MediaType.APPLICATION_XML])
+    fun findByKey(@PathVariable key: String): HttpResponse<PixKeyDetailsResponse>
 
 }
 
@@ -71,6 +72,33 @@ data class CreatePixKeyRequest(
                 )
             )
         }
+    }
+}
+
+data class PixKeyDetailsResponse (
+    val keyType: PixKeyType,
+    val key: String,
+    val bankAccount: BankAccount,
+    val owner: Owner,
+    val createdAt: LocalDateTime
+) {
+
+    fun toModel(): ChavePixInfo {
+        return ChavePixInfo(
+            tipo = keyType .domainType!!,
+            valor = this.key,
+            tipoDeConta = when (this.bankAccount.accountType) {
+                BankAccount.AccountType.CACC -> TipoDeConta.CONTA_CORRENTE
+                BankAccount.AccountType.SVGS -> TipoDeConta.CONTA_POUPANCA
+            },
+            conta = ContaAssociada(
+                instituicao = bankAccount.participant,
+                nomeDoTitular = owner.name,
+                cpfDoTitular = owner.taxIdNumber,
+                agencia = bankAccount.branch,
+                numero = bankAccount.accountNumber
+            )
+        )
     }
 }
 

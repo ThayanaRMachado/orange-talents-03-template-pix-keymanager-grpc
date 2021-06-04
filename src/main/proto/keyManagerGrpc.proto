@@ -15,6 +15,10 @@ service KeyManagerDeletaGrpcService {
   rpc deleta(DeletaChavePixRequest) returns (DeletaChavePixResponse){}
 }
 
+service KeyManagerCarregaGrpcService {
+  rpc carrega(CarregaChavePixRequest) returns (CarregaChavePixResponse) {}
+}
+
 enum TipoDeConta {
   UNKNOWN_TIPO_CONTA = 0;
   CONTA_CORRENTE = 1;
@@ -52,4 +56,36 @@ message DeletaChavePixRequest{
 
 message DeletaChavePixResponse{
   string status = 1;
+}
+
+message CarregaChavePixRequest {
+  string idTitular = 1;
+  oneof filtro {
+    string pixId = 2;
+    string chave = 3;
+  }
+}
+
+message CarregaChavePixResponse {
+
+  message ChavePix {
+
+    message ContaInfo {
+      TipoDeConta tipo     = 1;
+      string instituicao   = 2; /** ITAU UNIBANCO */
+      string nomeDoTitular = 3;
+      string cpfDoTitular  = 4;
+      string agencia       = 5;
+      string numeroDaConta = 6;
+    }
+
+    TipoDeChave tipo        = 2;
+    string chave            = 3;
+    ContaInfo conta         = 4;
+    google.protobuf.Timestamp criadaEm = 5;
+  }
+
+  string idTitular = 1;
+  string pixId  = 2;
+  ChavePix chave   = 3;
 }

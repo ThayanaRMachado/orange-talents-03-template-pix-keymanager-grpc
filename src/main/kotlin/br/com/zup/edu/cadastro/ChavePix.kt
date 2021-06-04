@@ -2,6 +2,7 @@ package br.com.zup.edu.cadastro
 
 import br.com.zup.edu.TipoDeChave
 import br.com.zup.edu.TipoDeConta
+import java.time.LocalDateTime
 import java.util.*
 import javax.persistence.*
 import javax.validation.Valid
@@ -32,6 +33,11 @@ class ChavePix(
 
     @Id
     var id: String = UUID.randomUUID().toString()
+
+    @Column(nullable = false)
+    val criadaEm: LocalDateTime = LocalDateTime.now()
+
+    fun pertenceAo(clienteId: UUID) = this.idTitular.equals(clienteId)
 
     fun isAleatoria(): Boolean {
         return tipoDeChave == TipoDeChave.ALEATORIA

@@ -29,12 +29,12 @@ class NovaChavePixService(
     @Transactional
     fun registra(@Valid novaChave: NovaChavePix): ChavePix{
 
-        val validaConta: HttpResponse<DadosDaContaResponse> =
-            itauClient.validaCliente(novaChave.idTitular, novaChave.tipoDeConta!!.name)
+        /*val validaConta: HttpResponse<DadosDaContaResponse> =
+            itauClient.validaCliente(novaChave.idTitular, novaChave.tipoDeConta.name)*/
 
-        val contaValidada: ContaAssociada
+        /*val contaValidada: ContaAssociada
             validaConta.body()?.toModel()
-                ?: throw ClienteInexistenteException("Cliente inexistente!")
+                ?: throw ClienteInexistenteException("Cliente inexistente!")*/
 
         if (repository.existsByValor(novaChave.valor))
             throw IllegalArgumentException("Chave Pix '${novaChave.valor}' existente")
